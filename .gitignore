@@ -1,0 +1,18 @@
+# build outputs
+out/
+*.o
+*.so
+*.a
+*.oppbuildspec
+*.log
+*.bak
+*~
+
+# IDE
+*.user
+*.workspace
+*.project
+
+# OS files
+.DS_Store
+Thumbs.db
