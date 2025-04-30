@@ -1,3 +1,15 @@
+# simulation results
+simulations/results/
+simulations/*.vec
+simulations/*.vci
+simulations/*.sca
+simulations/*.elog
+simulations/*.anf
+simulations/*.out
+
+# generated .qtenvrc files
+simulations/**/*.qtenvrc
+
 # build outputs
 out/
 *.o
