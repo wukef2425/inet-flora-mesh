@@ -28,3 +28,9 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
+
+# OMNeT++
+.cproject
+.nedfolders
+.oppfeaturestate
+.settings/
