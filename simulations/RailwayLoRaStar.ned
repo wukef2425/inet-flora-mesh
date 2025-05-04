@@ -15,39 +15,29 @@ network RailwayLoRaStar
     parameters:
         int numberOfNodes = default(20);
         int numberOfGateways = default(2);
-        double stationDistance = default(2000);
         @display("bgb=2400,900");
     submodules:
-        loRaNodes[numberOfNodes]: LoRaNode {
-            parameters:
-                @display("p=50+(i%10)*110, 150+floor(i/10)*100");
-        }
-        loRaGW[numberOfGateways]: LoRaGW {
-            parameters:
-                @display("p=200+400*i,350;is=s");
-        }
+        loRaNodes[numberOfNodes]: LoRaNode {}
+        loRaGW[numberOfGateways]: LoRaGW {}
         LoRaMedium: LoRaMedium {
             @display("p=480,100");
         }
         networkServer: StandardHost {
-            parameters:
-                @display("p=100,60");
+            @display("p=100,60");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 assignDisjunctSubnetAddresses = false;
-                @display("p=600,50");
+            @display("p=600,50");
         }
         internetCloud: InternetCloud {
             @display("p=350,60");
         }
         gwRouter0: Router {
-            parameters:
-                @display("p=300,300");
+            @display("p=300,300");
         }
         gwRouter1: Router {
-            parameters:
-                @display("p=700,300");
+            @display("p=700,300");
         }
         nsRouter: Router {
             @display("p=200,60");
