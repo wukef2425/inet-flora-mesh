@@ -122,6 +122,8 @@ class LoRaOptions
  * {
  *     int msgType \@enum(AppPacketType);
  *     int sampleMeasurement;
+ *     int msgId;
+ *     int hopCount;
  *     LoRaOptions options;
  * }
  * </pre>
@@ -131,6 +133,8 @@ class LoRaAppPacket : public ::inet::FieldsChunk
   protected:
     int msgType = 0;
     int sampleMeasurement = 0;
+    int msgId = 0;
+    int hopCount = 0;
     LoRaOptions options;
 
   private:
@@ -153,6 +157,12 @@ class LoRaAppPacket : public ::inet::FieldsChunk
 
     virtual int getSampleMeasurement() const;
     virtual void setSampleMeasurement(int sampleMeasurement);
+
+    virtual int getMsgId() const;
+    virtual void setMsgId(int msgId);
+
+    virtual int getHopCount() const;
+    virtual void setHopCount(int hopCount);
 
     virtual const LoRaOptions& getOptions() const;
     virtual LoRaOptions& getOptionsForUpdate() { handleChange();return const_cast<LoRaOptions&>(const_cast<LoRaAppPacket*>(this)->getOptions());}

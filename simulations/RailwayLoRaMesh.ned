@@ -10,7 +10,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
 
 @license(LGPL);
-network RailwayLoRaStar
+network RailwayLoRaMesh
 {
     parameters:
         int numberOfNodes = default(20);

@@ -56,6 +56,7 @@ void SimpleLoRaApp::initialize(int stage)
         sentPackets = 0;
         receivedADRCommands = 0;
         numberOfPacketsToSend = par("numberOfPacketsToSend");
+        maxHopCount = par("maxHopCount");
 
         LoRa_AppPacketSent = registerSignal("LoRa_AppPacketSent");
 
@@ -149,7 +150,8 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
 {
 //    LoRaAppPacket *packet = check_and_cast<LoRaAppPacket *>(msg);
     auto pkt = check_and_cast<Packet *>(msg);
-    const auto & packet = pkt->peekAtFront<LoRaAppPacket>();
+    const auto& packet = pkt->peekAtFront<LoRaAppPacket>();
+
     if (simTime() >= getSimulation()->getWarmupPeriod())
         receivedADRCommands++;
     if(evaluateADRinNode)
@@ -168,6 +170,29 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
             EV << "New TP " << getTP() << endl;
             EV << "New SF " << getSF() << endl;
         }
+    }
+
+    int msgId = packet->getMsgId();
+    int hopCount = packet->getHopCount();
+
+    if (seenMessageIds.count(msgId) == 0 && hopCount < maxHopCount) {
+        seenMessageIds.insert(msgId);
+
+        // Forwarding
+        auto pktFwd = new Packet("FwdData");
+        auto copy = makeShared<LoRaAppPacket>(*packet);
+        copy->setHopCount(hopCount + 1);
+
+        pktFwd->insertAtBack(copy);
+
+        auto tag = pktFwd->addTagIfAbsent<LoRaTag>();
+        tag->setBandwidth(getBW());
+        tag->setCenterFrequency(getCF());
+        tag->setSpreadFactor(getSF());
+        tag->setCodeRendundance(getCR());
+        tag->setPower(mW(math::dBmW2mW(getTP())));
+
+        send(pktFwd, "socketOut");
     }
 }
 
@@ -189,6 +214,10 @@ void SimpleLoRaApp::sendJoinRequest()
 
     lastSentMeasurement = rand();
     payload->setSampleMeasurement(lastSentMeasurement);
+
+    // set flooding metadata no matter ADR or not
+    payload->setMsgId(intrand(100000));
+    payload->setHopCount(0);
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {

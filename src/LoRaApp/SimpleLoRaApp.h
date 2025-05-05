@@ -85,6 +85,9 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle
         bool sendNextPacketWithADRACKReq = false;
         void increaseSFIfPossible();
 
+        int maxHopCount;
+        std::set<int> seenMessageIds;  // To avoid redundant forwarding
+
     public:
         SimpleLoRaApp() {}
         simsignal_t LoRa_AppPacketSent;
