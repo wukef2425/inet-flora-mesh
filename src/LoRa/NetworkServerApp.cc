@@ -127,6 +127,7 @@ void NetworkServerApp::finish()
 
     knownNodes.clear();
     receivedPackets.clear();
+    seenMsgIds.clear();
 
     recordScalar("counterUniqueReceivedPacketsPerSF SF7", counterUniqueReceivedPacketsPerSF[0]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF8", counterUniqueReceivedPacketsPerSF[1]);
@@ -249,6 +250,14 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     auto pkt = check_and_cast<Packet *>(selfMsg->removeControlInfo());
     const auto & frame = pkt->peekAtFront<LoRaMacFrame>();
 
+    Packet *tmp = pkt->dup();
+    tmp->trimFront();
+    tmp->removeAtFront<LoRaMacFrame>();
+    const auto &app = tmp->peekAtFront<LoRaAppPacket>();
+    int origin = app->getOriginNodeId();
+    int msgId = app->getMsgId();
+    delete tmp;
+
     if (simTime() >= getSimulation()->getWarmupPeriod())
     {
         counterUniqueReceivedPacketsPerSF[frame->getLoRaSF()-7]++;
@@ -263,14 +272,20 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
         const auto &frameAux = receivedPackets[i].rcvdPacket->peekAtFront<LoRaMacFrame>();
         if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())        {
             packetNumber = i;
-            nodeNumber = frame->getTransmitterAddress().getInt();
-            if (numReceivedPerNode.count(nodeNumber-1)>0)
-            {
-                ++numReceivedPerNode[nodeNumber-1];
-            } else {
-                numReceivedPerNode[nodeNumber-1] = 1;
+//            nodeNumber = frame->getTransmitterAddress().getInt();
+//            if (numReceivedPerNode.count(nodeNumber-1)>0)
+//            {
+//                ++numReceivedPerNode[nodeNumber-1];
+//            } else {
+//                numReceivedPerNode[nodeNumber-1] = 1;
+//            }
+            if (seenMsgIds.count(msgId) == 0) {
+                seenMsgIds.insert(msgId);
+                if (numReceivedPerNode.count(origin) > 0)
+                    ++numReceivedPerNode[origin];
+                else
+                    numReceivedPerNode[origin] = 1;
             }
-
             for(uint j=0;j<receivedPackets[i].possibleGateways.size();j++)
             {
                 if(SNIRinGW < std::get<1>(receivedPackets[i].possibleGateways[j]))

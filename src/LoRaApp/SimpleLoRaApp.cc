@@ -106,6 +106,7 @@ void SimpleLoRaApp::finish()
     recordScalar("finalSF", getSF());
     recordScalar("sentPackets", sentPackets);
     recordScalar("receivedADRCommands", receivedADRCommands);
+    seenMessageIds.clear();
 }
 
 void SimpleLoRaApp::handleMessage(cMessage *msg)
@@ -218,6 +219,9 @@ void SimpleLoRaApp::sendJoinRequest()
     // set flooding metadata no matter ADR or not
     payload->setMsgId(intrand(100000));
     payload->setHopCount(0);
+
+    cModule *host = getContainingNode(this);
+    payload->setOriginNodeId(host->getIndex());
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {

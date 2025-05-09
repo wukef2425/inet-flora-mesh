@@ -29,6 +29,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "../LoRaApp/LoRaAppPacket_m.h"
 #include <list>
+#include <set>
 
 namespace flora {
 
@@ -62,6 +63,8 @@ public:
 
 class NetworkServerApp : public cSimpleModule, cListener
 {
+  private:
+      std::set<int> seenMsgIds;
   protected:
     std::vector<knownNode> knownNodes;
     std::vector<knownGW> knownGateways;

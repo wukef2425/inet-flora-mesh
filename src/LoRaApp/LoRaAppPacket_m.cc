@@ -662,6 +662,7 @@ void LoRaAppPacket::copy(const LoRaAppPacket& other)
     this->sampleMeasurement = other.sampleMeasurement;
     this->msgId = other.msgId;
     this->hopCount = other.hopCount;
+    this->originNodeId = other.originNodeId;
     this->options = other.options;
 }
 
@@ -672,6 +673,7 @@ void LoRaAppPacket::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->sampleMeasurement);
     doParsimPacking(b,this->msgId);
     doParsimPacking(b,this->hopCount);
+    doParsimPacking(b,this->originNodeId);
     doParsimPacking(b,this->options);
 }
 
@@ -682,6 +684,7 @@ void LoRaAppPacket::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->sampleMeasurement);
     doParsimUnpacking(b,this->msgId);
     doParsimUnpacking(b,this->hopCount);
+    doParsimUnpacking(b,this->originNodeId);
     doParsimUnpacking(b,this->options);
 }
 
@@ -729,6 +732,17 @@ void LoRaAppPacket::setHopCount(int hopCount)
     this->hopCount = hopCount;
 }
 
+int LoRaAppPacket::getOriginNodeId() const
+{
+    return this->originNodeId;
+}
+
+void LoRaAppPacket::setOriginNodeId(int originNodeId)
+{
+    handleChange();
+    this->originNodeId = originNodeId;
+}
+
 const LoRaOptions& LoRaAppPacket::getOptions() const
 {
     return this->options;
@@ -749,6 +763,7 @@ class LoRaAppPacketDescriptor : public omnetpp::cClassDescriptor
         FIELD_sampleMeasurement,
         FIELD_msgId,
         FIELD_hopCount,
+        FIELD_originNodeId,
         FIELD_options,
     };
   public:
@@ -816,7 +831,7 @@ const char *LoRaAppPacketDescriptor::getProperty(const char *propertyName) const
 int LoRaAppPacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *base = getBaseClassDescriptor();
-    return base ? 5+base->getFieldCount() : 5;
+    return base ? 6+base->getFieldCount() : 6;
 }
 
 unsigned int LoRaAppPacketDescriptor::getFieldTypeFlags(int field) const
@@ -832,9 +847,10 @@ unsigned int LoRaAppPacketDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,    // FIELD_sampleMeasurement
         FD_ISEDITABLE,    // FIELD_msgId
         FD_ISEDITABLE,    // FIELD_hopCount
+        FD_ISEDITABLE,    // FIELD_originNodeId
         FD_ISCOMPOUND,    // FIELD_options
     };
-    return (field >= 0 && field < 5) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 6) ? fieldTypeFlags[field] : 0;
 }
 
 const char *LoRaAppPacketDescriptor::getFieldName(int field) const
@@ -850,9 +866,10 @@ const char *LoRaAppPacketDescriptor::getFieldName(int field) const
         "sampleMeasurement",
         "msgId",
         "hopCount",
+        "originNodeId",
         "options",
     };
-    return (field >= 0 && field < 5) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 6) ? fieldNames[field] : nullptr;
 }
 
 int LoRaAppPacketDescriptor::findField(const char *fieldName) const
@@ -863,7 +880,8 @@ int LoRaAppPacketDescriptor::findField(const char *fieldName) const
     if (strcmp(fieldName, "sampleMeasurement") == 0) return baseIndex + 1;
     if (strcmp(fieldName, "msgId") == 0) return baseIndex + 2;
     if (strcmp(fieldName, "hopCount") == 0) return baseIndex + 3;
-    if (strcmp(fieldName, "options") == 0) return baseIndex + 4;
+    if (strcmp(fieldName, "originNodeId") == 0) return baseIndex + 4;
+    if (strcmp(fieldName, "options") == 0) return baseIndex + 5;
     return base ? base->findField(fieldName) : -1;
 }
 
@@ -880,9 +898,10 @@ const char *LoRaAppPacketDescriptor::getFieldTypeString(int field) const
         "int",    // FIELD_sampleMeasurement
         "int",    // FIELD_msgId
         "int",    // FIELD_hopCount
+        "int",    // FIELD_originNodeId
         "flora::LoRaOptions",    // FIELD_options
     };
-    return (field >= 0 && field < 5) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 6) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **LoRaAppPacketDescriptor::getFieldPropertyNames(int field) const
@@ -977,6 +996,7 @@ std::string LoRaAppPacketDescriptor::getFieldValueAsString(omnetpp::any_ptr obje
         case FIELD_sampleMeasurement: return long2string(pp->getSampleMeasurement());
         case FIELD_msgId: return long2string(pp->getMsgId());
         case FIELD_hopCount: return long2string(pp->getHopCount());
+        case FIELD_originNodeId: return long2string(pp->getOriginNodeId());
         case FIELD_options: return "";
         default: return "";
     }
@@ -998,6 +1018,7 @@ void LoRaAppPacketDescriptor::setFieldValueAsString(omnetpp::any_ptr object, int
         case FIELD_sampleMeasurement: pp->setSampleMeasurement(string2long(value)); break;
         case FIELD_msgId: pp->setMsgId(string2long(value)); break;
         case FIELD_hopCount: pp->setHopCount(string2long(value)); break;
+        case FIELD_originNodeId: pp->setOriginNodeId(string2long(value)); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'LoRaAppPacket'", field);
     }
 }
@@ -1016,6 +1037,7 @@ omnetpp::cValue LoRaAppPacketDescriptor::getFieldValue(omnetpp::any_ptr object, 
         case FIELD_sampleMeasurement: return pp->getSampleMeasurement();
         case FIELD_msgId: return pp->getMsgId();
         case FIELD_hopCount: return pp->getHopCount();
+        case FIELD_originNodeId: return pp->getOriginNodeId();
         case FIELD_options: return omnetpp::toAnyPtr(&pp->getOptions()); break;
         default: throw omnetpp::cRuntimeError("Cannot return field %d of class 'LoRaAppPacket' as cValue -- field index out of range?", field);
     }
@@ -1037,6 +1059,7 @@ void LoRaAppPacketDescriptor::setFieldValue(omnetpp::any_ptr object, int field, 
         case FIELD_sampleMeasurement: pp->setSampleMeasurement(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_msgId: pp->setMsgId(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_hopCount: pp->setHopCount(omnetpp::checked_int_cast<int>(value.intValue())); break;
+        case FIELD_originNodeId: pp->setOriginNodeId(omnetpp::checked_int_cast<int>(value.intValue())); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'LoRaAppPacket'", field);
     }
 }
