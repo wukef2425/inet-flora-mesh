@@ -87,7 +87,6 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle
 
         int maxHopCount;
         std::set<int> seenMessageIds;  // To avoid redundant forwarding
-
     public:
         SimpleLoRaApp() {}
         simsignal_t LoRa_AppPacketSent;

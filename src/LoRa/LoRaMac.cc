@@ -338,7 +338,7 @@ void LoRaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive2-Unicast,
                                   isLowerMessage(msg) && isForUs(frame),
                                   IDLE,
-                sendUp(pkt);
+                sendUp(decapsulate(pkt));
                 numReceived++;
                 cancelEvent(endListening_2);
             );
@@ -528,7 +528,7 @@ bool LoRaMac::isBroadcast(const Ptr<const LoRaMacFrame> &frame)
 
 bool LoRaMac::isForUs(const Ptr<const LoRaMacFrame> &frame)
 {
-    return frame->getReceiverAddress() == address;
+    return frame->getReceiverAddress() == address || frame->getReceiverAddress().isBroadcast();
 }
 
 void LoRaMac::turnOnReceiver()
