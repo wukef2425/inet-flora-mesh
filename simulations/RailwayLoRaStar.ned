@@ -13,9 +13,9 @@ import inet.node.ethernet.Eth1G;
 network RailwayLoRaStar
 {
     parameters:
-        int numberOfNodes = default(20);
+        int numberOfNodes = default(100);
         int numberOfGateways = default(2);
-        @display("bgb=2400,900");
+        @display("bgb=10100,600");
     submodules:
         loRaNodes[numberOfNodes]: LoRaNode {}
         loRaGW[numberOfGateways]: LoRaGW {}
