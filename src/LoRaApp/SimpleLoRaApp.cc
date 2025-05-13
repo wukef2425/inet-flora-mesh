@@ -216,12 +216,13 @@ void SimpleLoRaApp::sendJoinRequest()
     lastSentMeasurement = rand();
     payload->setSampleMeasurement(lastSentMeasurement);
 
-    // set flooding metadata no matter ADR or not
-    payload->setMsgId(intrand(100000));
-    payload->setHopCount(0);
-
     cModule *host = getContainingNode(this);
-    payload->setOriginNodeId(host->getIndex());
+    int nodeId = host->getIndex();
+
+    static int globalMsgCounter = 0;
+    payload->setMsgId(nodeId * 1000000 + globalMsgCounter++);
+    payload->setHopCount(0);
+    payload->setOriginNodeId(nodeId);
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {
