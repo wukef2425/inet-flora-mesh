@@ -57,6 +57,7 @@ void SimpleLoRaApp::initialize(int stage)
         receivedADRCommands = 0;
         numberOfPacketsToSend = par("numberOfPacketsToSend");
         maxHopCount = par("maxHopCount");
+        myDistance = par("distance");
 
         LoRa_AppPacketSent = registerSignal("LoRa_AppPacketSent");
 
@@ -179,22 +180,47 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
     if (seenMessageIds.count(msgId) == 0 && hopCount < maxHopCount) {
         seenMessageIds.insert(msgId);
 
-        // Forwarding
-        auto pktFwd = new Packet("FwdData");
-        auto copy = makeShared<LoRaAppPacket>(*packet);
-        copy->setHopCount(hopCount + 1);
+        // only forward if I am further from the gateway than the sender
+        if (packet->getDistance() < myDistance) {
+            auto pktFwd = new Packet("FwdData");
+            auto copy = makeShared<LoRaAppPacket>(*packet);
+            copy->setHopCount(packet->getHopCount() + 1);
+            copy->setDistance(myDistance); // set my distance
 
-        pktFwd->insertAtBack(copy);
+            pktFwd->insertAtBack(copy);
+            auto tag = pktFwd->addTagIfAbsent<LoRaTag>();
+            tag->setBandwidth(getBW());
+            tag->setCenterFrequency(getCF());
+            tag->setSpreadFactor(getSF());
+            tag->setCodeRendundance(getCR());
+            tag->setPower(mW(math::dBmW2mW(getTP())));
 
-        auto tag = pktFwd->addTagIfAbsent<LoRaTag>();
-        tag->setBandwidth(getBW());
-        tag->setCenterFrequency(getCF());
-        tag->setSpreadFactor(getSF());
-        tag->setCodeRendundance(getCR());
-        tag->setPower(mW(math::dBmW2mW(getTP())));
-
-        send(pktFwd, "socketOut");
+            // slot-based delay
+            double delay = myDistance * 0.2; // 0.2s per hop
+            sendDelayed(pktFwd, delay, "socketOut");
+        }
     }
+
+
+//    if (seenMessageIds.count(msgId) == 0 && hopCount < maxHopCount) {
+//        seenMessageIds.insert(msgId);
+//
+//        // Forwarding
+//        auto pktFwd = new Packet("FwdData");
+//        auto copy = makeShared<LoRaAppPacket>(*packet);
+//        copy->setHopCount(hopCount + 1);
+//
+//        pktFwd->insertAtBack(copy);
+//
+//        auto tag = pktFwd->addTagIfAbsent<LoRaTag>();
+//        tag->setBandwidth(getBW());
+//        tag->setCenterFrequency(getCF());
+//        tag->setSpreadFactor(getSF());
+//        tag->setCodeRendundance(getCR());
+//        tag->setPower(mW(math::dBmW2mW(getTP())));
+//
+//        send(pktFwd, "socketOut");
+//    }
 }
 
 bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
@@ -223,6 +249,7 @@ void SimpleLoRaApp::sendJoinRequest()
     payload->setMsgId(nodeId * 1000000 + globalMsgCounter++);
     payload->setHopCount(0);
     payload->setOriginNodeId(nodeId);
+    payload->setDistance(myDistance);
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {

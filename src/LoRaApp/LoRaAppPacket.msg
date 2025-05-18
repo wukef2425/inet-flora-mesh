@@ -46,5 +46,6 @@ class LoRaAppPacket extends inet::FieldsChunk {
     int msgId;
     int hopCount;
     int originNodeId;
+    int distance;
     LoRaOptions options;
 }

@@ -125,6 +125,7 @@ class LoRaOptions
  *     int msgId;
  *     int hopCount;
  *     int originNodeId;
+ *     int distance;
  *     LoRaOptions options;
  * }
  * </pre>
@@ -137,6 +138,7 @@ class LoRaAppPacket : public ::inet::FieldsChunk
     int msgId = 0;
     int hopCount = 0;
     int originNodeId = 0;
+    int distance = 0;
     LoRaOptions options;
 
   private:
@@ -168,6 +170,9 @@ class LoRaAppPacket : public ::inet::FieldsChunk
 
     virtual int getOriginNodeId() const;
     virtual void setOriginNodeId(int originNodeId);
+
+    virtual int getDistance() const;
+    virtual void setDistance(int distance);
 
     virtual const LoRaOptions& getOptions() const;
     virtual LoRaOptions& getOptionsForUpdate() { handleChange();return const_cast<LoRaOptions&>(const_cast<LoRaAppPacket*>(this)->getOptions());}

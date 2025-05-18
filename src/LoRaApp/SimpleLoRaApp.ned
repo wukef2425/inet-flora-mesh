@@ -37,6 +37,7 @@ simple SimpleLoRaApp like IApp
         bool evaluateADRinNode = default(false);
         int dataSize @unit(B) = default(10B);
         int maxHopCount = default(7);
+        int distance = default(-1);
     gates:
         input socketIn @labels(LoRaAppPacket/up);
         output socketOut @labels(LoRaAppPacket/down);        
